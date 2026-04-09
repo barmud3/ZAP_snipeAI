@@ -6,7 +6,9 @@ Prototype for a hiring assignment: convert a business website into a structured 
 
 - [https://zap-snipe-ai.vercel.app/](https://zap-snipe-ai.vercel.app/)
 
-- [Watch the demo video on Vimeo](https://vimeo.com/1181573025)
+## Demo Video
+
+- [Watch demo on Vimeo](https://vimeo.com/1181573025)
 
 ## What it does
 
