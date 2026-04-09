@@ -52,24 +52,37 @@ function Value({ value }: { value: string | null }) {
 
 export function ClientCard({ profile, pagesScanned }: ClientCardProps) {
   return (
-    <div className="space-y-4">
-      <SectionCard title="Business Overview">
+    <div className="space-y-6">
+      <SectionCard title="Onboarding Summary" tone="primary">
+        <p dir="auto" className="text-sm leading-6 text-slate-800">
+          <Value value={profile.onboardingSummary} />
+        </p>
+      </SectionCard>
+
+      <SectionCard title="Business Overview" tone="primary">
         <p>
-          <span className="font-medium">Business Name: </span>
+          <span className="font-semibold">Business Name: </span>
           <Value value={profile.businessName} />
         </p>
         <p>
-          <span className="font-medium">Description: </span>
+          <span className="font-semibold">Description: </span>
           <Value value={profile.businessDescription} />
         </p>
         <p>
-          <span className="font-medium">Industry: </span>
+          <span className="font-semibold">Industry: </span>
           <Value value={profile.industry} />
         </p>
         <p>
-          <span className="font-medium">Location: </span>
+          <span className="font-semibold">Location: </span>
           <Value value={profile.location} />
         </p>
+      </SectionCard>
+
+      <SectionCard title="Main Services">
+        <ListOrFallback
+          items={profile.mainServices}
+          fallback="No specific services detected."
+        />
       </SectionCard>
 
       <SectionCard title="Contact Information">
@@ -87,13 +100,6 @@ export function ClientCard({ profile, pagesScanned }: ClientCardProps) {
         </p>
       </SectionCard>
 
-      <SectionCard title="Main Services">
-        <ListOrFallback
-          items={profile.mainServices}
-          fallback="No specific services detected."
-        />
-      </SectionCard>
-
       <SectionCard title="Audience and Brand Tone">
         <p>
           <span className="font-medium">Target Audience: </span>
@@ -105,42 +111,39 @@ export function ClientCard({ profile, pagesScanned }: ClientCardProps) {
         </p>
       </SectionCard>
 
-      <SectionCard title="Digital Assets">
+      <SectionCard title="Review Mentions">
+        <p>
+          <span className="font-medium">Sentiment: </span>
+          {profile.reviewInsights.sentimentSummary}
+        </p>
+        <p dir="auto">
+          <span className="font-medium">Summary: </span>
+          <Value value={profile.reviewInsights.summary} />
+        </p>
+        <p className="pt-1 font-medium">Example Mentions</p>
+        <ListOrFallback items={profile.reviewInsights.examples} fallback="No concise review examples available." />
+      </SectionCard>
+
+      <SectionCard title="Digital Assets" tone="muted">
         <p className="font-medium">Social Links</p>
         <ListOrFallback items={profile.socialLinks} fallback="No social links found." />
         <p className="pt-2 font-medium">Image URLs</p>
         <ListOrFallback items={profile.imageUrls} fallback="No image URLs found." />
       </SectionCard>
 
-      <SectionCard title="Review Mentions">
-        <ListOrFallback
-          items={profile.reviewMentions}
-          fallback="No public reviews or testimonials surfaced."
-        />
-      </SectionCard>
-
-      <SectionCard title="Missing Information">
-        <ListOrFallback
-          items={profile.missingInformation}
-          fallback="No major gaps flagged."
-        />
-      </SectionCard>
-
-      <SectionCard title="Suggested Onboarding Actions">
-        <ListOrFallback
-          items={profile.suggestedOnboardingActions}
-          fallback="No onboarding actions suggested."
-        />
-      </SectionCard>
-
-      <SectionCard title="Pages Scanned">
-        <ul className="list-disc space-y-1 pl-5">
-          {pagesScanned.map((page) => (
-            <li key={page.url} dir="auto">
-              {page.title} - {page.url}
-            </li>
-          ))}
-        </ul>
+      <SectionCard title="Technical Details" tone="muted">
+        <details>
+          <summary className="cursor-pointer font-medium text-slate-700">
+            Pages Scanned ({pagesScanned.length})
+          </summary>
+          <ul className="list-disc space-y-1 pl-5 pt-3">
+            {pagesScanned.map((page, idx) => (
+              <li key={`${page.url}-${idx}`} dir="auto">
+                {page.title} - {page.url}
+              </li>
+            ))}
+          </ul>
+        </details>
       </SectionCard>
     </div>
   );

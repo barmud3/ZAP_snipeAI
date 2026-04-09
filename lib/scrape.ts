@@ -17,20 +17,61 @@ export type ScrapedPage = {
   text: string;
 };
 
-async function fetchHtml(url: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (compatible; ClientOnboardingExtractor/1.0; +https://example.local)"
-    },
-    next: { revalidate: 0 }
-  });
+type FetchResult = {
+  html: string;
+  finalUrl: string;
+};
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url} (${response.status})`);
+function buildCandidateUrls(url: string): string[] {
+  const base = new URL(url);
+  const candidates: string[] = [base.toString()];
+
+  const toggledProtocol = new URL(base.toString());
+  toggledProtocol.protocol = base.protocol === "https:" ? "http:" : "https:";
+  candidates.push(toggledProtocol.toString());
+
+  if (!base.hostname.startsWith("www.")) {
+    const withWww = new URL(base.toString());
+    withWww.hostname = `www.${base.hostname}`;
+    candidates.push(withWww.toString());
   }
 
-  return response.text();
+  return cleanList(candidates);
+}
+
+async function fetchHtml(url: string): Promise<FetchResult> {
+  const candidates = buildCandidateUrls(url);
+  const failedStatuses: string[] = [];
+
+  for (const candidateUrl of candidates) {
+    try {
+      const response = await fetch(candidateUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "en-US,en;q=0.9,he;q=0.8"
+        },
+        next: { revalidate: 0 }
+      });
+
+      if (!response.ok) {
+        failedStatuses.push(`${candidateUrl} (${response.status})`);
+        continue;
+      }
+
+      return {
+        html: await response.text(),
+        finalUrl: response.url || candidateUrl
+      };
+    } catch {
+      failedStatuses.push(`${candidateUrl} (network error)`);
+    }
+  }
+
+  throw new Error(
+    `Failed to fetch website homepage. Tried: ${failedStatuses.join(", ")}`
+  );
 }
 
 function getInternalLinks(html: string, baseUrl: string): string[] {
@@ -73,24 +114,26 @@ function rankLinks(links: string[]): string[] {
 }
 
 async function scrapeSinglePage(url: string): Promise<ScrapedPage> {
-  const html = await fetchHtml(url);
+  const { html, finalUrl } = await fetchHtml(url);
   const $ = cheerio.load(html);
-  const title = $("title").first().text().trim() || url;
+  const title = $("title").first().text().trim() || finalUrl;
   const text = extractVisibleText(html);
-  return { url, title, text };
+  return { url: finalUrl, title, text };
 }
 
 export async function scrapeWebsite(
   startUrl: string,
   maxPages = 5
 ): Promise<ScrapedPage[]> {
-  const homepageHtml = await fetchHtml(startUrl);
+  const homepageFetch = await fetchHtml(startUrl);
+  const homepageHtml = homepageFetch.html;
+  const homepageUrl = homepageFetch.finalUrl;
   const homepageText = extractVisibleText(homepageHtml);
   const homepageTitle = cheerio.load(homepageHtml)("title").first().text().trim();
 
-  const internalLinks = getInternalLinks(homepageHtml, startUrl);
+  const internalLinks = getInternalLinks(homepageHtml, homepageUrl);
   const rankedLinks = rankLinks(internalLinks).slice(0, Math.max(0, maxPages - 1));
-  const pagesToFetch = [startUrl, ...rankedLinks];
+  const pagesToFetch = [homepageUrl, ...rankedLinks];
 
   const results = await Promise.allSettled(
     pagesToFetch.map(async (url, index) => {
@@ -105,13 +148,24 @@ export async function scrapeWebsite(
     })
   );
 
-  return results
+  const fulfilledPages = results
     .filter(
       (result): result is PromiseFulfilledResult<ScrapedPage> =>
         result.status === "fulfilled"
     )
-    .map((result) => result.value)
-    .slice(0, maxPages);
+    .map((result) => result.value);
+
+  const seenUrls = new Set<string>();
+  const uniquePages: ScrapedPage[] = [];
+
+  for (const page of fulfilledPages) {
+    if (seenUrls.has(page.url)) continue;
+    seenUrls.add(page.url);
+    uniquePages.push(page);
+    if (uniquePages.length >= maxPages) break;
+  }
+
+  return uniquePages;
 }
 
 export function buildCorpus(pages: ScrapedPage[]): string {

@@ -47,6 +47,16 @@ export async function POST(request: NextRequest) {
     const message =
       error instanceof Error ? error.message : "Unexpected analyze failure.";
 
+    if (message.includes("Failed to fetch website homepage")) {
+      return NextResponse.json(
+        {
+          error:
+            "Unable to access that website for scraping (it may block automated requests). Try another URL or a publicly accessible page."
+        },
+        { status: 422 }
+      );
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -16,11 +16,11 @@ export function UrlForm({ onAnalyze, isLoading }: UrlFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-6 shadow-md">
       <label htmlFor="website-url" className="mb-2 block text-sm font-medium text-slate-700">
         Business website URL
       </label>
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <input
           id="website-url"
           type="url"
@@ -28,12 +28,12 @@ export function UrlForm({ onAnalyze, isLoading }: UrlFormProps) {
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://example.com"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none ring-slate-300 placeholder:text-slate-400 focus:ring"
+          className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm outline-none ring-slate-300 placeholder:text-slate-400 focus:ring"
         />
         <button
           type="submit"
           disabled={isLoading}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
+          className="rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isLoading ? "Analyzing..." : "Analyze Website"}
         </button>
