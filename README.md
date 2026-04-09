@@ -2,6 +2,10 @@
 
 Prototype for a hiring assignment: convert a business website into a structured internal onboarding profile.
 
+## Live Demo
+
+- [https://zap-snipe-ai.vercel.app/](https://zap-snipe-ai.vercel.app/)
+
 ## What it does
 
 1. User enters a website URL.
