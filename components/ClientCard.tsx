@@ -59,53 +59,6 @@ export function ClientCard({ profile, pagesScanned }: ClientCardProps) {
         </p>
       </SectionCard>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <SectionCard title="Business Snapshot">
-          <p>
-            <span className="font-medium">Rating: </span>
-            {profile.businessSnapshot.rating ?? "Unknown"}
-          </p>
-          <p>
-            <span className="font-medium">Review Count: </span>
-            {profile.businessSnapshot.reviewCount ?? "Unknown"}
-          </p>
-          <p>
-            <span className="font-medium">Status: </span>
-            {profile.businessSnapshot.openNow === null
-              ? "Unknown"
-              : profile.businessSnapshot.openNow
-                ? "Open Now"
-                : "Closed"}
-          </p>
-        </SectionCard>
-
-        <SectionCard title="Commercial Snapshot">
-          <p>
-            <span className="font-medium">Price Range: </span>
-            <Value value={profile.commercialSnapshot.priceRange} />
-          </p>
-          <p className="pt-1 font-medium">Service Areas</p>
-          <ListOrFallback
-            items={profile.commercialSnapshot.serviceAreas}
-            fallback="No specific service areas found."
-          />
-        </SectionCard>
-
-        <SectionCard title="Asset Snapshot">
-          <p>
-            <span className="font-medium">Image Assets: </span>
-            {profile.imageUrls.length}
-          </p>
-          <p>
-            <span className="font-medium">Social Profiles: </span>
-            {profile.socialLinks.length}
-          </p>
-          <p className="pt-1 text-xs text-slate-500">
-            Snapshot widgets help onboarding teams understand presence quickly.
-          </p>
-        </SectionCard>
-      </div>
-
       <SectionCard title="Business Overview" tone="primary">
         <p>
           <span className="font-semibold">Business Name: </span>
@@ -176,15 +129,6 @@ export function ClientCard({ profile, pagesScanned }: ClientCardProps) {
         <ListOrFallback items={profile.socialLinks} fallback="No social links found." />
         <p className="pt-2 font-medium">Image URLs</p>
         <ListOrFallback items={profile.imageUrls} fallback="No image URLs found." />
-        {profile.businessSnapshot.businessHours.length ? (
-          <>
-            <p className="pt-2 font-medium">Business Hours</p>
-            <ListOrFallback
-              items={profile.businessSnapshot.businessHours}
-              fallback="No business hours found."
-            />
-          </>
-        ) : null}
       </SectionCard>
 
       <SectionCard title="Technical Details" tone="muted">

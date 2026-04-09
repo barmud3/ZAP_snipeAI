@@ -50,10 +50,3 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
-
-## Limitations (prototype scope)
-
-- Static HTML scraping only (JS-heavy sites may be partial)
-- Some websites block automated scraping (403)
-- AI output quality depends on source content quality
-- No persistence/authentication by design
