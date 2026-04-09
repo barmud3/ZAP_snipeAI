@@ -6,6 +6,16 @@ export const analyzeRequestSchema = z.object({
 
 export const clientProfileSchema = z.object({
   onboardingSummary: z.string().nullable(),
+  businessSnapshot: z.object({
+    rating: z.number().nullable(),
+    reviewCount: z.number().nullable(),
+    openNow: z.boolean().nullable(),
+    businessHours: z.array(z.string())
+  }),
+  commercialSnapshot: z.object({
+    priceRange: z.string().nullable(),
+    serviceAreas: z.array(z.string())
+  }),
   businessName: z.string().nullable(),
   businessDescription: z.string().nullable(),
   industry: z.string().nullable(),

@@ -1,140 +1,66 @@
 # Client Onboarding Extractor
 
-A lightweight Next.js prototype that simulates an AI-powered onboarding assistant.
+Prototype for a hiring assignment: convert a business website into a structured internal onboarding profile.
 
-Users submit a business website URL, the system scrapes up to 5 relevant pages, and Anthropic turns that content into a structured **client card** that helps onboarding teams start with a reliable first profile.
+## What it does
 
-## Why this is useful for onboarding
+1. User enters a website URL.
+2. Backend scrapes the homepage + up to 4 relevant internal pages.
+3. AI extracts structured business data.
+4. UI shows an onboarding-ready client profile + call script.
 
-New client onboarding often starts with fragmented information and repetitive discovery calls.
-This prototype reduces that initial friction by:
+This is intentionally a clean, demo-focused internal tool (no auth, no DB).
 
-- pre-filling core business context from public website content
-- surfacing missing information the team should request
-- suggesting immediate next onboarding actions
+## Tech and why it matches the requirements
 
-## Tech stack
+- **Next.js (App Router) + TypeScript**  
+  Required stack. Used for UI + API routes in one project.
 
-- Next.js (App Router) + TypeScript
-- Tailwind CSS
-- Anthropic API
-- Cheerio for HTML parsing/scraping
-- Zod for request and AI response validation
+- **Tailwind CSS**  
+  Required stack. Used for fast, clean internal-tool styling and clear hierarchy.
 
-## What the prototype does
+- **Anthropic API**  
+  Used for structured extraction and onboarding call script generation.
 
-1. Accepts a business website URL.
-2. Fetches the homepage HTML.
-3. Extracts internal links from the same domain.
-4. Prioritizes likely useful pages (`about`, `services`, `contact`, `pricing`, `solutions`, `products`).
-5. Scrapes up to 5 pages total (homepage + selected links).
-6. Cleans and combines text into one corpus.
-7. Sends corpus to Anthropic with a structured extraction prompt.
-8. Validates AI output against a Zod schema.
-9. Renders a clean client card with onboarding-focused sections.
+- **Cheerio**  
+  Required scraping library. Parses HTML and extracts titles/text/links without a headless browser.
 
-## Scraping approach
+- **Zod**  
+  Required validation library. Validates input and AI output schemas to keep responses predictable.
 
-Scraping is intentionally simple and demo-friendly:
+## Requirement mapping
 
-- server-side fetch of raw HTML (no headless browser)
-- parse with Cheerio
-- remove noisy elements (`script`, `style`, `noscript`, `svg`, `iframe`, `form`, `header`, `footer`)
-- extract page title + visible body text
-- collect only internal links from the same origin
-- rank links using onboarding-relevant keywords
-
-This keeps implementation readable and reliable enough for a prototype.
-
-## AI extraction approach
-
-The app sends combined page content to Anthropic and asks for a strict JSON object with:
-
-- business details (name, description, industry, location)
-- contact fields
-- services and audience context
-- brand tone, social links, image URLs, review mentions
-- `missingInformation` and `suggestedOnboardingActions`
-
-The prompt emphasizes:
-
-- evidence-based extraction
-- careful inference only when reasonable
-- no hallucinated facts
-- explicit unknowns
-
-The JSON response is parsed and validated with Zod before returning to the UI.
-
-## Architecture (short)
-
-- `app/page.tsx`: main UX, form submission, loading/error/result states
-- `app/api/analyze/route.ts`: URL validation, scraping orchestration, AI call, response validation
-- `components/*`: reusable UI blocks for form and sectioned client card
-- `lib/scrape.ts`: fetch + parse + internal link prioritization + corpus builder
-- `lib/extractText.ts`: visible text extraction/cleanup
-- `lib/anthropic.ts`: prompt + Anthropic request + Zod output parsing
-- `lib/schema.ts`: shared Zod schemas/types
-
-## Project structure
-
-```text
-app/
-  api/analyze/route.ts
-  globals.css
-  layout.tsx
-  page.tsx
-components/
-  ClientCard.tsx
-  SectionCard.tsx
-  UrlForm.tsx
-lib/
-  extractText.ts
-  anthropic.ts
-  schema.ts
-  scrape.ts
-  utils.ts
-```
+- **URL input + Analyze flow**: `app/page.tsx`, `components/UrlForm.tsx`
+- **POST analyze endpoint**: `app/api/analyze/route.ts`
+- **Scrape up to 5 pages, prioritize relevant links**: `lib/scrape.ts`
+- **Structured AI extraction**: `lib/anthropic.ts`
+- **Schema validation**: `lib/schema.ts`
+- **Client card UI sections**: `components/ClientCard.tsx`, `components/SectionCard.tsx`
+- **Onboarding call script UI**: `components/CallScriptCard.tsx`
 
 ## Run locally
-
-1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-2. Add environment variables:
-
-```bash
-cp .env.example .env.local
-```
-
-Set:
+Create `.env.local` file:
 
 ```env
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
 
-3. Start the dev server:
+Run:
 
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000)
 
-## Limitations
+## Limitations (prototype scope)
 
-- Static HTML scraping only (JS-heavy websites may return partial content)
-- No crawl politeness controls (robots.txt handling, advanced rate limiting)
-- Basic relevance scoring for links
-- AI extraction quality depends on content quality and model behavior
-- No persistence/database/authentication (prototype-only)
-
-## Future improvements
-
-- better page selection heuristics and deduplication
-- richer content chunking and confidence scoring
-- optional headless fallback for JS-rendered pages
-- retry and timeout policies for scraping robustness
-- export/share workflow for onboarding teams (PDF/CRM handoff)
+- Static HTML scraping only (JS-heavy sites may be partial)
+- Some websites block automated scraping (403)
+- AI output quality depends on source content quality
+- No persistence/authentication by design

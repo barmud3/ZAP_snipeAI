@@ -28,6 +28,8 @@ Rules:
 
 Return an object with exactly these keys:
 - onboardingSummary
+- businessSnapshot
+- commercialSnapshot
 - businessName
 - businessDescription
 - industry
@@ -50,9 +52,24 @@ reviewInsights shape:
   "examples": ["short example", "short example"]
 }
 
+businessSnapshot shape:
+{
+  "rating": number | null,
+  "reviewCount": number | null,
+  "openNow": boolean | null,
+  "businessHours": ["string"]
+}
+
+commercialSnapshot shape:
+{
+  "priceRange": "string | null",
+  "serviceAreas": ["string"]
+}
+
 Additional constraints:
 - onboardingSummary: 2-3 short sentences for internal onboarding teams.
 - Keep review examples short and capped.
+- Extract businessSnapshot and commercialSnapshot only when evidence exists.
 
 Website: ${website}
 
@@ -116,6 +133,25 @@ function asStringArray(value: unknown): string[] {
     .filter((item): item is string => typeof item === "string")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function asNullableNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value.replace(/[^\d.]/g, ""));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function asNullableBoolean(value: unknown): boolean | null {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const lower = value.toLowerCase();
+    if (["true", "open", "yes"].includes(lower)) return true;
+    if (["false", "closed", "no"].includes(lower)) return false;
+  }
+  return null;
 }
 
 function asUrlArray(value: unknown): string[] {
@@ -242,6 +278,28 @@ function normalizeProfilePayload(raw: unknown, website: string): unknown {
         industry,
         location
       }),
+    businessSnapshot: {
+      rating: asNullableNumber(data.businessSnapshot && typeof data.businessSnapshot === "object" ? (data.businessSnapshot as Record<string, unknown>).rating : null),
+      reviewCount: asNullableNumber(data.businessSnapshot && typeof data.businessSnapshot === "object" ? (data.businessSnapshot as Record<string, unknown>).reviewCount : null),
+      openNow: asNullableBoolean(data.businessSnapshot && typeof data.businessSnapshot === "object" ? (data.businessSnapshot as Record<string, unknown>).openNow : null),
+      businessHours: asStringArray(
+        data.businessSnapshot && typeof data.businessSnapshot === "object"
+          ? (data.businessSnapshot as Record<string, unknown>).businessHours
+          : []
+      ).slice(0, 7)
+    },
+    commercialSnapshot: {
+      priceRange: asNullableString(
+        data.commercialSnapshot && typeof data.commercialSnapshot === "object"
+          ? (data.commercialSnapshot as Record<string, unknown>).priceRange
+          : null
+      ),
+      serviceAreas: asStringArray(
+        data.commercialSnapshot && typeof data.commercialSnapshot === "object"
+          ? (data.commercialSnapshot as Record<string, unknown>).serviceAreas
+          : []
+      ).slice(0, 6)
+    },
     businessName,
     businessDescription,
     industry,
