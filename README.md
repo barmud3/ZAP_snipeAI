@@ -11,32 +11,25 @@ Prototype for a hiring assignment: convert a business website into a structured 
 
 This is intentionally a clean, demo-focused internal tool (no auth, no DB).
 
-## Tech and why it matches the requirements
+## Technology choices and assignment fit
 
 - **Next.js (App Router) + TypeScript**  
-  Required stack. Used for UI + API routes in one project.
+  This matches the required framework and keeps frontend + backend in one codebase. App Router is used for the page UI and API routes (`/api/analyze`, `/api/call-script`) so the full prototype flow is easy to demo and maintain.
 
 - **Tailwind CSS**  
-  Required stack. Used for fast, clean internal-tool styling and clear hierarchy.
+  This matches the required styling stack and supports fast iteration on clean internal-tool UX. It is used to create a clear hierarchy (summary first, structured cards, technical details at the bottom) without over-engineering.
 
-- **Anthropic API**  
-  Used for structured extraction and onboarding call script generation.
+- **Anthropic API (AI layer)**  
+  AI is used in two practical steps required by the product goal:  
+  1) transform scraped website text into structured onboarding data, and  
+  2) generate a personalized onboarding call script from that profile.  
+  This makes the prototype more than scraping; it turns content into onboarding-ready output.
 
-- **Cheerio**  
-  Required scraping library. Parses HTML and extracts titles/text/links without a headless browser.
+- **Cheerio (scraping layer)**  
+  This matches the required parsing library and keeps scraping lightweight. It extracts text/title/links from static HTML, keeps internal links only, and supports selecting up to 5 relevant pages (homepage + prioritized internal pages).
 
-- **Zod**  
-  Required validation library. Validates input and AI output schemas to keep responses predictable.
-
-## Requirement mapping
-
-- **URL input + Analyze flow**: `app/page.tsx`, `components/UrlForm.tsx`
-- **POST analyze endpoint**: `app/api/analyze/route.ts`
-- **Scrape up to 5 pages, prioritize relevant links**: `lib/scrape.ts`
-- **Structured AI extraction**: `lib/anthropic.ts`
-- **Schema validation**: `lib/schema.ts`
-- **Client card UI sections**: `components/ClientCard.tsx`, `components/SectionCard.tsx`
-- **Onboarding call script UI**: `components/CallScriptCard.tsx`
+- **Zod (validation layer)**  
+  This matches the required schema-validation library and is used to validate request input and AI outputs. It prevents malformed AI responses from breaking the UI and keeps API responses predictable for the demo.
 
 ## Run locally
 
