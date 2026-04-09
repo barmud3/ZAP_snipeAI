@@ -14,6 +14,9 @@ Rules:
 - Use only the provided content as evidence.
 - Infer carefully when reasonable, but do not hallucinate unsupported facts.
 - If a field is unknown, return null for strings, [] for arrays.
+- Preserve the original language from the source content for all extracted text.
+- Do not translate Hebrew content into English.
+- Keep list items (services, reviews, missing info, onboarding actions) in the same language used on the site.
 - Return missingInformation as explicit gaps onboarding should collect.
 - Return suggestedOnboardingActions as practical next onboarding steps based on missing/unclear data.
 - website must be the provided website URL unless a better canonical URL is clearly shown.

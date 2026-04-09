@@ -6,6 +6,10 @@ type ClientCardProps = {
   pagesScanned: Array<{ url: string; title: string }>;
 };
 
+function hasHebrew(value: string): boolean {
+  return /[\u0590-\u05FF]/.test(value);
+}
+
 function ListOrFallback({
   items,
   fallback
@@ -20,14 +24,30 @@ function ListOrFallback({
   return (
     <ul className="list-disc space-y-1 pl-5">
       {items.map((item, idx) => (
-        <li key={`${item}-${idx}`}>{item}</li>
+        <li
+          key={`${item}-${idx}`}
+          dir={hasHebrew(item) ? "rtl" : "ltr"}
+          className={hasHebrew(item) ? "text-right" : ""}
+        >
+          {item}
+        </li>
       ))}
     </ul>
   );
 }
 
 function Value({ value }: { value: string | null }) {
-  return value ? <span>{value}</span> : <span className="text-slate-500">Unknown</span>;
+  if (!value) {
+    return <span className="text-slate-500">Unknown</span>;
+  }
+
+  const isHebrew = hasHebrew(value);
+
+  return (
+    <span dir={isHebrew ? "rtl" : "ltr"} className={isHebrew ? "inline-block text-right" : ""}>
+      {value}
+    </span>
+  );
 }
 
 export function ClientCard({ profile, pagesScanned }: ClientCardProps) {
@@ -116,7 +136,7 @@ export function ClientCard({ profile, pagesScanned }: ClientCardProps) {
       <SectionCard title="Pages Scanned">
         <ul className="list-disc space-y-1 pl-5">
           {pagesScanned.map((page) => (
-            <li key={page.url}>
+            <li key={page.url} dir="auto">
               {page.title} - {page.url}
             </li>
           ))}
